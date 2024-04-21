@@ -82,7 +82,6 @@ def check_interval(child):
 def roulette_selection(population):
     _parents = []
     _wheel_position = 0
-    print("population",population)
     _population_probabilities = computation_probability(population)
     for _ in range(PARENTS_SELECTED):
         _rand = random.uniform(0,1)
@@ -146,7 +145,7 @@ def genetic_algorithm():
     _population = generate_population()
     best_results = []
     worst_results = []
-    for _ in range(GENERATION_SIZE):
+    for i in range(GENERATION_SIZE):
         _parents = roulette_selection(_population)
         _children = reproduction(_parents)
         _population = replace_population(_population, _children)
@@ -154,6 +153,7 @@ def genetic_algorithm():
         # Guardar el mejor y el peor resultado de la generación
         best_result = min(_population, key=lambda x: x[1])
         worst_result = max(_population, key=lambda x: x[1])
+        print("Generación {}: Mejor resultado: {}, Peor resultado: {}".format(i+1, best_result, worst_result))
         best_results.append(best_result)
         worst_results.append(worst_result)
         
@@ -177,7 +177,7 @@ def plot_results(best_results, worst_results):
 # # Ejemplo de uso
 final_population, best_results, worst_results = genetic_algorithm()
 
-# print("\nMejores resultados de cada generación:")
+#print("\nMejores resultados de cada generación:")
 # for generation, result in enumerate(best_results, start=1):
 #     print("Generación {}: {}".format(generation, result))
 
