@@ -1,30 +1,29 @@
-
 import random
 import math
 import matplotlib.pyplot as plt
 
+## Problem definition
+## An array of 10 numbers represents an individual
+## Each element of the array is a number between -5.12 and 5.12
+## The population will be of 1000 individuals
+## There will be 1000 generations
+## The probability of mutation will be 0.4 
 
-##Caracteristicas
-##Individuo es un arreglo de tamaño 10
-##La población será de 1000 individuos
-##La cantidad de generaciones será de 1000
-##La probabilidad de mutación será de 0.4
-##Los individuos son arreglos de 10 numeros los cuales deben ser −5.12 ≤ x ≤ 5.12
-
-POPULATION_SIZE = 1000
+POPULATION_SIZE = 1200
 GENERATION_SIZE = 10000
 ALPHA = 1
-MUTATION_RATE = 0.4
+MUTATION_RATE = 0.5
 PARENTS_SELECTED = 200
 
-##Crea un individuo , el cual es un areglo de 10 numeros aleatorios entre -5.12 y 5.12
+## Create an individual, which is an array of 10 random numbers between -5.12 and 5.12
 def generate_individual():
     _individual = []
     for _ in range(10):
-        _number = round(random.uniform(-5.120, 5.120),3)
+        _number = round(random.uniform(-5.120, 5.120), 3)
         _individual.append(_number)
     return _individual
-##Crea una población de 1000 individuos que son arreglos
+
+## Create a population of 1000 individuals, each individual is an array of 10 numbers
 def generate_population():
     _population = []
     for i in range(POPULATION_SIZE):
@@ -32,7 +31,8 @@ def generate_population():
         _fitness = fitness(_individual)
         _population.append((_individual, _fitness))
     return _population
-##Función de aptitud de un individuo, solo regresa el valor de la función
+
+## Fitness function of an individual
 def fitness(individual):
     _result = 0
     for i in range(0,9):
@@ -42,8 +42,9 @@ def fitness(individual):
         _result += 100 + _sum
     return round(_result,3)
 
-##Cruza de dos individuos, regresa dos hijos
-def cruza_BLX_A(parentA, parentB):
+## Variation using BLX-Alpha crossover
+## Return two offspring
+def blx_a_crossover(parentA, parentB):
     _cmax = 0
     _cmin = 0
     _alpha = ALPHA
@@ -62,7 +63,7 @@ def cruza_BLX_A(parentA, parentB):
     _childy = uniform_mutation(_childy)
     return _childx, _childy
 
-##Mutación de un individuo, regresa el individuo mutado
+## Mutation is uniform, each number of the individual has a probability of 0.4 of being mutated
 def uniform_mutation(child):
     for i in range(0,9):
         _rand = random.uniform(0,1)
@@ -70,7 +71,7 @@ def uniform_mutation(child):
             child[i] = round(random.uniform(-5.120, 5.120),3)
     return child
 
-##Checa que los valores del individuo esten en el intervalo permitido [-5.120, 5.120]
+## Verify that the values of the individual are within the allowed interval [-5.120, 5.120]
 def check_interval(child):
     for i in range(0,9):
         if child[i] < -5.120:
@@ -78,7 +79,9 @@ def check_interval(child):
         if child[i] > 5.120:
             child[i] = 5.120
     return child
-##Selección de padres por ruleta, regresa los padres seleccionados
+
+## Selection of parents by roulette
+## Return the selected parents
 def roulette_selection(population):
     _parents = []
     _wheel_position = 0
@@ -86,7 +89,7 @@ def roulette_selection(population):
     for _ in range(PARENTS_SELECTED):
         _rand = random.uniform(0,1)
         _wheel_weight = 0
-        ##where to move the wheel
+        ## Set the position to move the wheel
         _wheel_position += _wheel_position + _rand
         _wheel_position = _wheel_position if _wheel_position <= 1 else (_wheel_position - 1)      
         for i, _individual_probabilities in enumerate(_population_probabilities):
@@ -98,35 +101,39 @@ def roulette_selection(population):
                 continue
     return _parents
 
-##Auxiliar para la selección de padres
+## Aux for parent selection
 def computation_probability(population):
     _probabilities = []
     for individual in population:
         _aptitude_value = individual[1]
-        _probabilitie = 1 / _aptitude_value
-        _probabilities.append(_probabilitie)
+        _probability = 1 / _aptitude_value
+        _probabilities.append(_probability)
     _sum_prob = sum(_probabilities)
     _normalization_prob = [_prob / _sum_prob for _prob in _probabilities]
     return _normalization_prob
-##Reproducción de los padres, regresa los hijos, se hace la cruza de los padres, mutación y se checa el intervalo, ademas se calcula el fitness de los hijos
+
+## Define parent reproduction
+## Return the children
+## Cross the parents, mutate and check the interval, also calculate the fitness of the children
 def reproduction(parents):
     _children = []
     for i in range(0, len(parents)-1,2):
         _parentA = parents[i][0]
         _parentB = parents[i+1][0]
-        _childA, _childB = cruza_BLX_A(_parentA, _parentB)
+        _childA, _childB = blx_a_crossover(_parentA, _parentB)
         _children.append((_childA, fitness(_childA)))
         _children.append((_childB, fitness(_childB)))
     return _children
-##Reemplazo de la población, se juntan los hijos con la población actual, se eliminan los peores individuos y se regresa la nueva población
+
+## Set the elitism strategy. Only the best individuals are kept
 def replace_population(population, children):
-    # Combine la población actual y los hijos generados
+    ## Combine the current population and the generated children
     _population = population + children
-    # Calcule la cantidad de individuos a mantener en función del tamaño original de la población
+    ## Calculate the number of individuals to keep based on the original population size
     num_to_keep = len(population)
-    # Encuentre los índices de los peores individuos (los de mayor valor de fitness)
+    ## Find the indices of the worst individuals (those with the highest fitness value)
     worst_indices = sorted(range(len(_population)), key=lambda i: _population[i][1])[-num_to_keep:]
-    # Cree una nueva población eliminando los peores individuos
+    ## Create a new population by removing the worst individuals
     new_population = [ind for i, ind in enumerate(_population) if i not in worst_indices]
     return new_population
 
@@ -138,9 +145,10 @@ def replace_population(population, children):
 #         _population = replace_population(_population, _children)
 #     return _population
 
-
 # print(genetic_algorithm())
-##Algoritmo genético, regresa la población final, los mejores resultados de cada generación y los peores resultados de cada generación
+
+## Set genetic algorithm
+## Return the final population, the best results of each generation and the worst results of each generation
 def genetic_algorithm():
     _population = generate_population()
     best_results = []
@@ -150,10 +158,10 @@ def genetic_algorithm():
         _children = reproduction(_parents)
         _population = replace_population(_population, _children)
         
-        # Guardar el mejor y el peor resultado de la generación
+        ## Save the best and worst result of the generation
         best_result = min(_population, key=lambda x: x[1])
         worst_result = max(_population, key=lambda x: x[1])
-        print("Generación {}: Mejor resultado: {}, Peor resultado: {}".format(i+1, best_result, worst_result))
+        print("Generation {}: Best result: {}, Worst result: {}".format(i+1, best_result, worst_result))
         best_results.append(best_result)
         worst_results.append(worst_result)
         
@@ -165,22 +173,14 @@ def plot_results(best_results, worst_results):
     best_fitness = [result[1] for result in best_results]
     worst_fitness = [result[1] for result in worst_results]
     
-    plt.plot(generations, best_fitness, label='Mejor resultado de la generación')
-    plt.plot(generations, worst_fitness, label='Peor resultado de la generación')
-    plt.xlabel('Generación')
+    plt.plot(generations, best_fitness, label='Best fitness of the generation')
+    plt.plot(generations, worst_fitness, label='Worst fitness of the generation')
+    plt.xlabel('Generation')
     plt.ylabel('Fitness')
-    plt.title('Evaluación de los individuos en cada generación')
+    plt.title('Evaluation of individuals in each generation')
     plt.legend()
     plt.grid(True)
     plt.show()
 
-# # Ejemplo de uso
+## Run the genetic algorithm
 final_population, best_results, worst_results = genetic_algorithm()
-
-#print("\nMejores resultados de cada generación:")
-# for generation, result in enumerate(best_results, start=1):
-#     print("Generación {}: {}".format(generation, result))
-
-# print("\nPeores resultados de cada generación:")
-# for generation, result in enumerate(worst_results, start=1):
-#     print("Generación {}: {}".format(generation, result))
