@@ -13,7 +13,8 @@ POPULATION_SIZE = 1200
 GENERATION_SIZE = 10000
 ALPHA = 1
 MUTATION_RATE = 0.5
-PARENTS_SELECTED = 200
+PARENTS_SELECTED = 9999
+EXECUTIONS = 30
 
 ## Create an individual, which is an array of 10 random numbers between -5.12 and 5.12
 def generate_individual():
@@ -165,7 +166,7 @@ def genetic_algorithm():
         best_results.append(best_result)
         worst_results.append(worst_result)
         
-    plot_results(best_results, worst_results)
+    ## plot_results(best_results, worst_results)
     return _population, best_results, worst_results
 
 def plot_results(best_results, worst_results):
@@ -182,5 +183,39 @@ def plot_results(best_results, worst_results):
     plt.grid(True)
     plt.show()
 
+def plot_results_final(best_results_list, worst_results_list):
+    plt.figure(figsize=(12, 6))
+    plt.subplot(1, 2, 1)
+    plt.title("30 Best Results")
+    generations = range(1, GENERATION_SIZE + 1)
+    for i, best_results in enumerate(best_results_list):
+        generations = range(1, len(best_results) + 1)
+        best_fitness = [result[1] for result in best_results]
+        plt.plot(generations, best_fitness, label=f'Iteration {i+1}')
+    plt.xlabel('Generation')
+    plt.ylabel('Fitness')
+    plt.legend()
+
+    plt.subplot(1, 2, 2)
+    plt.title("30 Worst Results")
+    for i, worst_results in enumerate(worst_results_list):
+        generations = range(1, len(worst_results) + 1)
+        worst_fitness = [result[1] for result in worst_results]
+        plt.plot(generations, worst_fitness, label=f'Iteratioon {i+1}')
+    plt.xlabel('Generation')
+    plt.ylabel('Fitness')
+    plt.legend()
+
+    plt.grid(True)
+    plt.tight_layout()
+    plt.show()
+
 ## Run the genetic algorithm
-final_population, best_results, worst_results = genetic_algorithm()
+best = []
+worst = []
+for i in range(EXECUTIONS):
+    final_population, best_results, worst_results = genetic_algorithm()
+    best.append(best_results)
+    worst.append(worst_results)
+
+plot_results_final(best, worst)
